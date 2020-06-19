@@ -162,6 +162,7 @@ class Seq2Seq_Full(nn.Module):
         self.output_size = output_size
         
         self.latent_size = latent_size
+        self.using_cuda = torch.cuda.is_available()
         self.mean = nn.Linear(self.encoder.hidden_size, self.latent_size)
         self.logvar = nn.Linear(self.encoder.hidden_size, self.latent_size)
         self.latent2hidden = nn.Linear(self.latent_size, self.decoder.hidden_size)
