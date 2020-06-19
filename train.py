@@ -23,6 +23,7 @@ from utils import *
 from data_loader import *
 from metric.metric import *
 from model.seq2seq_attention import Seq2Seq
+from model.seq2seq_gp import Seq2Seq_Full
 from model.seq2seq_multi_head_attention import Seq2Seq_Multi_Head
 from model.seq2seq_transformer import Transformer
 from model.HRED import HRED
@@ -321,7 +322,7 @@ def write_into_tb(pred_path, writer, writer_str, epoch, ppl, bleu_mode, model, d
     # load the dict
     # with open('./data/glove_embedding.pkl', 'rb') as f:
     #     dic = pickle.load(f)
-    dic = gensim.models.KeyedVectors.load_word2vec_format('./data/GoogleNews-vectors-negative300.bin', binary=True)
+    dic = gensim.models.KeyedVectors.load_word2vec_format('GoogleNews-vectors-negative300.bin.gz', binary=True)
     print('[!] load the GoogleNews 300 word2vector by gensim over')
     ea_sum, vx_sum, gm_sum, counterp = 0, 0, 0, 0
     for rr, cc in tqdm(list(zip(ref, tgt))):
@@ -462,6 +463,16 @@ def main(**kwargs):
         net = Seq2Seq(len(src_w2idx), kwargs['embed_size'], len(tgt_w2idx), 
                       kwargs['utter_hidden' ], 
                       kwargs['decoder_hidden'], teach_force=kwargs['teach_force'],
+                      pad=tgt_w2idx['<pad>'], sos=tgt_w2idx['<sos>'],
+                      dropout=kwargs['dropout'], 
+                      utter_n_layer=kwargs['utter_n_layer'], 
+                      pretrained=pretrained)
+    elif kwargs['model'] == 'Seq2Seq_Full':
+        net = Seq2Seq_Full(len(src_w2idx), kwargs['embed_size'], len(tgt_w2idx), 
+                      kwargs['utter_hidden' ], 
+                      kwargs['decoder_hidden'], 
+                      kwargs['latent_size'], kwargs['kernel_v'], kwargs['kernel_r'], 
+                      teach_force=kwargs['teach_force'],
                       pad=tgt_w2idx['<pad>'], sos=tgt_w2idx['<sos>'],
                       dropout=kwargs['dropout'], 
                       utter_n_layer=kwargs['utter_n_layer'], 
@@ -702,6 +713,12 @@ if __name__ == "__main__":
     parser.add_argument('--model', type=str, default='HRED', help='model to be trained')
     parser.add_argument('--utter_hidden', type=int, default=150, 
                         help='utterance encoder hidden size')
+    parser.add_argument('--latent_size', type=int, default=256, 
+                        help='latent variable size')
+    parser.add_argument('--kernel_v', type=float, default=1.0, 
+                        help='kernel param v')
+    parser.add_argument('--kernel_r', type=float, default=0.0001, 
+                        help='kernel param r')
     parser.add_argument('--teach_force', type=float, default=0.5, 
                         help='teach force ratio')
     parser.add_argument('--context_hidden', type=int, default=150, 

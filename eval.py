@@ -55,7 +55,7 @@ if __name__ == "__main__":
     
     # Embedding-based metric: Embedding Average (EA), Vector Extrema (VX), Greedy Matching (GM)
     # load the dict
-    dic = gensim.models.KeyedVectors.load_word2vec_format('./data/GoogleNews-vectors-negative300.bin', binary=True)
+    dic = gensim.models.KeyedVectors.load_word2vec_format('GoogleNews-vectors-negative300.bin.gz', binary=True)
     print('[!] load the GoogleNews 300 word2vector by gensim over')
     ea_sum, vx_sum, gm_sum, counterp = 0, 0, 0, 0
     no_save = 0
