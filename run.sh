@@ -307,7 +307,7 @@ elif [ $mode = 'train' ]; then
         --train_graph ./processed/$dataset/train-graph.pkl \
         --test_graph ./processed/$dataset/test-graph.pkl \
         --dev_graph ./processed/$dataset/dev-graph.pkl \
-        --pred ./processed/${dataset}/${model}/pure-pred.txt \
+        --pred ./processed/${dataset}/${model}/${kernel_v}/pure-pred.txt \
         --min_threshold 0 \
         --max_threshold 100 \
         --seed 30 \
@@ -352,8 +352,8 @@ elif [ $mode = 'train' ]; then
         --gat_heads 8 \
 
 elif [ $mode = 'translate' ]; then
-    rm ./processed/$dataset/$model/pertub-ppl.txt
-    rm ./processed/$dataset/$model/pred.txt
+    rm ./processed/$dataset/$model/$kernel_v/pertub-ppl.txt
+    rm ./processed/$dataset/$model/$kernel_v/pred.txt
     
     if [ $model = 'Transformer' ]; then
         # other repo set the 0.1 as the dropout ratio, remain it
@@ -398,7 +398,7 @@ elif [ $mode = 'translate' ]; then
         --src_vocab $src_vocab \
         --tgt_vocab $tgt_vocab \
         --maxlen $maxlen \
-        --pred ./processed/${dataset}/${model}/pure-pred.txt \
+        --pred ./processed/${dataset}/${model}/${kernel_v}/pure-pred.txt \
         --hierarchical $hierarchical \
         --tgt_maxlen $tgtmaxlen \
         --graph $graph \
