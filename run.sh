@@ -239,32 +239,32 @@ elif [ $mode = 'graph' ]; then
         
 elif [ $mode = 'train' ]; then
     # cp -r ./ckpt/$dataset/$model ./bak/ckpt    # too big, stop back up it
-    rm -rf ./ckpt/$dataset/$model_$kernel_v
-    mkdir -p ./ckpt/$dataset/$model_$kernel_v
+    rm -rf ./ckpt/$dataset/$model/$kernel_v
+    mkdir -p ./ckpt/$dataset/$model/$kernel_v
     
     # create the training folder
-    if [ ! -d "./processed/$dataset/$model_$kernel_v" ]; then
-        mkdir -p ./processed/$dataset/$model_$kernel_v
+    if [ ! -d "./processed/$dataset/$model/$kernel_v" ]; then
+        mkdir -p ./processed/$dataset/$model/$kernel_v
     else
-        echo "[!] ./processed/$dataset/$model_$kernel_v: already exists"
+        echo "[!] ./processed/$dataset/$model/$kernel_v: already exists"
     fi
     
     # delete traninglog.txt
-    if [ ! -f "./processed/$dataset/$model_$kernel_v/trainlog.txt" ]; then
-        echo "[!] ./processed/$dataset/$model_$kernel_v/trainlog.txt doesn't exist"
+    if [ ! -f "./processed/$dataset/$model/$kernel_v/trainlog.txt" ]; then
+        echo "[!] ./processed/$dataset/$model/$kernel_v/trainlog.txt doesn't exist"
     else
-        rm ./processed/$dataset/$model_$kernel_v/trainlog.txt
+        rm ./processed/$dataset/$model/$kernel_v/trainlog.txt
     fi
     
     # delete metadata.txt
-    if [ ! -f "./processed/$dataset/$model_$kernel_v/metadata.txt" ]; then
-        echo "[!] ./processed/$dataset/$model_$kernel_v/metadata.txt doesn't exist"
+    if [ ! -f "./processed/$dataset/$model/$kernel_v/metadata.txt" ]; then
+        echo "[!] ./processed/$dataset/$model/$kernel_v/metadata.txt doesn't exist"
     else
-        rm ./processed/$dataset/$model_$kernel_v/metadata.txt
+        rm ./processed/$dataset/$model/$kernel_v/metadata.txt
     fi
     
     cp -r tblogs/$dataset/ ./bak/tblogs
-    rm tblogs/$dataset/$model_$kernel_v/*
+    rm tblogs/$dataset/$model/$kernel_v/*
     
     # Because of the posterior, the Variational models need to bind the src and tgt vocabulary
     if [[ $model = 'VHRED' || $model = 'KgCVAE' ]]; then
