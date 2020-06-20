@@ -310,7 +310,7 @@ elif [ $mode = 'train' ]; then
         --min_threshold 0 \
         --max_threshold 100 \
         --seed 30 \
-        --epochs 50 \
+        --epochs 100 \
         --lr $lr \
         --batch_size $batch_size \
         --model $model \
