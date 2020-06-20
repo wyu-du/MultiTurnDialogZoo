@@ -243,7 +243,7 @@ elif [ $mode = 'train' ]; then
     mkdir -p ./ckpt/$dataset/$model_$kernel_v
     
     # create the training folder
-    if [ ! -d "./processed/$dataset/$model" ]; then
+    if [ ! -d "./processed/$dataset/$model_$kernel_v" ]; then
         mkdir -p ./processed/$dataset/$model_$kernel_v
     else
         echo "[!] ./processed/$dataset/$model_$kernel_v: already exists"
