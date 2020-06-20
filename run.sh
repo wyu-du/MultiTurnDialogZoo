@@ -6,6 +6,7 @@ mode=$1     # graph/stat/train/translate/eval/curve
 dataset=$2
 model=$3
 CUDA=$4
+kernel_v=$5
 
 # try catch
 if [ ! $model ]; then
@@ -238,32 +239,32 @@ elif [ $mode = 'graph' ]; then
         
 elif [ $mode = 'train' ]; then
     # cp -r ./ckpt/$dataset/$model ./bak/ckpt    # too big, stop back up it
-    rm -rf ./ckpt/$dataset/$model
-    mkdir -p ./ckpt/$dataset/$model
+    rm -rf ./ckpt/$dataset/$model_$kernel_v
+    mkdir -p ./ckpt/$dataset/$model_$kernel_v
     
     # create the training folder
     if [ ! -d "./processed/$dataset/$model" ]; then
-        mkdir -p ./processed/$dataset/$model
+        mkdir -p ./processed/$dataset/$model_$kernel_v
     else
-        echo "[!] ./processed/$dataset/$model: already exists"
+        echo "[!] ./processed/$dataset/$model_$kernel_v: already exists"
     fi
     
     # delete traninglog.txt
-    if [ ! -f "./processed/$dataset/$model/trainlog.txt" ]; then
-        echo "[!] ./processed/$dataset/$model/trainlog.txt doesn't exist"
+    if [ ! -f "./processed/$dataset/$model_$kernel_v/trainlog.txt" ]; then
+        echo "[!] ./processed/$dataset/$model_$kernel_v/trainlog.txt doesn't exist"
     else
-        rm ./processed/$dataset/$model/trainlog.txt
+        rm ./processed/$dataset/$model_$kernel_v/trainlog.txt
     fi
     
     # delete metadata.txt
-    if [ ! -f "./processed/$dataset/$model/metadata.txt" ]; then
-        echo "[!] ./processed/$dataset/$model/metadata.txt doesn't exist"
+    if [ ! -f "./processed/$dataset/$model_$kernel_v/metadata.txt" ]; then
+        echo "[!] ./processed/$dataset/$model_$kernel_v/metadata.txt doesn't exist"
     else
-        rm ./processed/$dataset/$model/metadata.txt
+        rm ./processed/$dataset/$model_$kernel_v/metadata.txt
     fi
     
     cp -r tblogs/$dataset/ ./bak/tblogs
-    rm tblogs/$dataset/$model/*
+    rm tblogs/$dataset/$model_$kernel_v/*
     
     # Because of the posterior, the Variational models need to bind the src and tgt vocabulary
     if [[ $model = 'VHRED' || $model = 'KgCVAE' ]]; then
