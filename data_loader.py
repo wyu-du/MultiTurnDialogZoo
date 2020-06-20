@@ -363,14 +363,14 @@ def get_batch_data_graph(src, tgt, graph, src_vocab, tgt_vocab,
 
 if __name__ == "__main__":
     batch_num = 0
-    src_w2idx, src_idx2w = load_pickle('./processed/dailydialog/iptvocab.pkl')
-    tgt_w2idx, tgt_idx2w = load_pickle('./processed/dailydialog/optvocab.pkl')
+    src_w2idx, src_idx2w = load_pickle('./processed/DailyDialog/iptvocab.pkl')
+    tgt_w2idx, tgt_idx2w = load_pickle('./processed/DailyDialog/optvocab.pkl')
     torch.cuda.set_device(2)
-    for sbatch, tbatch, turn_lengths in get_batch_data_flatten('./data/dailydialog/src-train.txt', 
-            './data/dailydialog/tgt-train.txt',
-                                         './processed/dailydialog/iptvocab.pkl',
-                                         './processed/dailydialog/optvocab.pkl',
-                                         32, 50):
+    for sbatch, tbatch, turn_lengths in get_batch_data_flatten('./data/DailyDialog/src-train.txt', 
+                                                               './data/DailyDialog/tgt-train.txt',
+                                                               './processed/DailyDialog/iptvocab.pkl',
+                                                               './processed/DailyDialog/optvocab.pkl',
+                                                               32, 50):
         ipdb.set_trace()
         print(len(sbatch), tbatch.shape, turn_lengths.shape)
         # if len(sbatch) == 3:
