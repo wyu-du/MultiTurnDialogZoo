@@ -168,10 +168,8 @@ class Seq2Seq_Full(nn.Module):
         self.latent2hidden = nn.Linear(self.latent_size, self.decoder.hidden_size)
         
         # parameters for kernel
-        kernel_v = nn.Parameter(torch.ones(1)* v, requires_grad=False)
-        self.register_parameter('kernel_v', kernel_v)
-        kernel_r = nn.Parameter(torch.ones(1)* r, requires_grad=False)
-        self.register_parameter('kernel_r', kernel_r)
+        self.kernel_v = torch.ones(1) * v
+        self.kernel_r = torch.ones(1) * r
         if self.using_cuda:
             self.kernel_v = self.kernel_v.cuda()
             self.kernel_r = self.kernel_r.cuda()
@@ -358,10 +356,8 @@ class Seq2Seq_Half(nn.Module):
         self.latent2hidden = nn.Linear(self.latent_size, self.decoder.hidden_size)
         
         # parameters for kernel
-        kernel_v = nn.Parameter(torch.ones(1)* v, requires_grad=False)
-        self.register_parameter('kernel_v', kernel_v)
-        kernel_r = nn.Parameter(torch.ones(1)* r, requires_grad=False)
-        self.register_parameter('kernel_r', kernel_r)
+        self.kernel_v = torch.ones(1) * v
+        self.kernel_r = torch.ones(1) * r
         if self.using_cuda:
             self.kernel_v = self.kernel_v.cuda()
             self.kernel_r = self.kernel_r.cuda()
