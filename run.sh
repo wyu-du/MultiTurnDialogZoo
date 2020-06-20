@@ -412,6 +412,7 @@ elif [ $mode = 'translate' ]; then
         
     # exit    # comment this line for ppl perturbation test, or only translate the test dataset 
     # 10 perturbation
+    '''
     for i in {1..10}
     do
         echo "========== running the perturbation $i =========="
@@ -451,6 +452,7 @@ elif [ $mode = 'translate' ]; then
             --gat_heads 8 \
             --teach_force 1
     done
+    '''
 
 elif [ $mode = 'eval' ]; then
     # before this mode, make sure you run the translate mode to generate the pred.txt file for evaluating.
