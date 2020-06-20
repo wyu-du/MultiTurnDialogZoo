@@ -799,7 +799,7 @@ if __name__ == "__main__":
     # show the parameters and write into file
     print('[!] Parameters:')
     print(args)
-    with open(f'./processed/{args.dataset}/{args.model}_{args.kernel_r}/metadata.txt', 'w') as f:
+    with open(f'./processed/{args.dataset}/{args.model}_{args.kernel_v}/metadata.txt', 'w') as f:
         print(args, file=f)
 
     # set random seed

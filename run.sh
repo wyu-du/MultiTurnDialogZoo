@@ -320,7 +320,7 @@ elif [ $mode = 'train' ]; then
         --teach_force 1 \
         --context_hidden 512 \
         --decoder_hidden 512 \
-        --kernel_v 1.0 \
+        --kernel_v $kernel_v \
         --kernel_r 0.0001 \
         --embed_size 256 \
         --patience 5 \
