@@ -272,7 +272,7 @@ def translate(data_iter, net, **kwargs):
     l = round(total_loss / batch_num, 4)
     print(f'[!] write the translate result into {kwargs["pred"]}')
     print(f'[!] test loss: {l}, test ppl: {round(math.exp(l), 4)}', 
-          file=open(f'./processed/{kwargs["dataset"]}/{kwargs["model"]}_{kwargs["kernel_v"]}/trainlog.txt', 'a'))
+          file=open(f'./processed/{kwargs["dataset"]}/{kwargs["model"]}/{kwargs["kernel_v"]}/trainlog.txt', 'a'))
     
     return math.exp(l)
 
@@ -352,7 +352,7 @@ def write_into_tb(pred_path, writer, writer_str, epoch, ppl, bleu_mode, model, d
 
 def main(**kwargs):
     # tensorboard 
-    writer = SummaryWriter(log_dir=f'./tblogs/{kwargs["dataset"]}/{kwargs["model"]}_{kwargs["kernel_v"]}')
+    writer = SummaryWriter(log_dir=f'./tblogs/{kwargs["dataset"]}/{kwargs["model"]}/{kwargs["kernel_v"]}')
 
     # load vocab
     src_vocab, tgt_vocab = load_pickle(kwargs['src_vocab']), load_pickle(kwargs['tgt_vocab'])
@@ -675,7 +675,7 @@ def main(**kwargs):
             state = {'net': net.state_dict(), 'opt': optim_state, 
                      'epoch': epoch, 'patience': patience}
             torch.save(state, 
-                           f'./ckpt/{kwargs["dataset"]}/{kwargs["model"]}_{kwargs["kernel_v"]}/vloss_{val_loss}_epoch_{epoch}.pt')
+                           f'./ckpt/{kwargs["dataset"]}/{kwargs["model"]}/{kwargs["kernel_v"]}/vloss_{val_loss}_epoch_{epoch}.pt')
         
         # translate on test dataset
         with torch.no_grad():
@@ -799,7 +799,7 @@ if __name__ == "__main__":
     # show the parameters and write into file
     print('[!] Parameters:')
     print(args)
-    with open(f'./processed/{args.dataset}/{args.model}_{args.kernel_v}/metadata.txt', 'w') as f:
+    with open(f'./processed/{args.dataset}/{args.model}/{args.kernel_v}/metadata.txt', 'w') as f:
         print(args, file=f)
 
     # set random seed
