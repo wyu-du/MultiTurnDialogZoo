@@ -264,8 +264,8 @@ class Seq2Seq_Full(nn.Module):
         mean = enc_output.sum(dim=2) # L x B
         mean = mean.transpose(0, 1)  # B x L
         var = torch.zeros((b, l, l), requires_grad=False) # B x L x L
-        var = self.kernel_v * var
         if self.using_cuda: var = var.cuda()
+        var = self.kernel_v * var
 #        for i in range(l):
 #            for j in range(l):
 #                var[:, i, j] = self.kernel_func(enc_output[i,:,:], enc_output[j,:,:])
@@ -452,8 +452,8 @@ class Seq2Seq_Half(nn.Module):
         mean = enc_output.sum(dim=2) # L x B
         mean = mean.transpose(0, 1)  # B x L
         var = torch.zeros((b, l, l), requires_grad=False) # B x L x L
-        var = self.kernel_v * var
         if self.using_cuda: var = var.cuda()
+        var = self.kernel_v * var
 #        for i in range(l):
 #            for j in range(l):
 #                if j>= i:
