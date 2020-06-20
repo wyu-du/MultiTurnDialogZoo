@@ -172,6 +172,9 @@ class Seq2Seq_Full(nn.Module):
         self.register_parameter('kernel_v', kernel_v)
         kernel_r = nn.Parameter(torch.ones(1)* r, requires_grad=False)
         self.register_parameter('kernel_r', kernel_r)
+        if self.using_cuda:
+            self.kernel_v = self.kernel_v.cuda()
+            self.kernel_r = self.kernel_r.cuda()
         
     def forward(self, src, tgt, lengths):
         # src: [lengths, batch], tgt: [lengths, batch], lengths: [batch]
@@ -359,6 +362,9 @@ class Seq2Seq_Half(nn.Module):
         self.register_parameter('kernel_v', kernel_v)
         kernel_r = nn.Parameter(torch.ones(1)* r, requires_grad=False)
         self.register_parameter('kernel_r', kernel_r)
+        if self.using_cuda:
+            self.kernel_v = self.kernel_v.cuda()
+            self.kernel_r = self.kernel_r.cuda()
         
     def forward(self, src, tgt, lengths):
         # src: [lengths, batch], tgt: [lengths, batch], lengths: [batch]
