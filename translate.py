@@ -333,7 +333,7 @@ def translate(**kwargs):
     print(f'[!] write the translate result into {kwargs["pred"]}')
     
     if kwargs['ppl'] == 'origin':
-        print(f'[!] loss: {l}, PPL: {round(math.exp(l), 4)}', file=open(f'./processed/{kwargs["dataset"]}/{kwargs["model"]}/pertub-ppl.txt', 'a'))
+        print(f'[!] loss: {l}, PPL: {round(math.exp(l), 4)}', file=open(f'./processed/{kwargs["dataset"]}/{kwargs["model"]}/{kwargs["kernel_v"]}/pertub-ppl.txt', 'a'))
     else:
         raise Exception(f'[!] make sure the mode for ppl calculating is origin or ngram, but {kwargs["ppl"]} is given.')
 

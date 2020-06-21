@@ -386,6 +386,8 @@ elif [ $mode = 'translate' ]; then
         --utter_hidden 512 \
         --context_hidden 512 \
         --decoder_hidden 512 \
+        --kernel_v $kernel_v \
+        --kernel_r 0.0001 \
         --seed 30 \
         --dropout $dropout \
         --embed_size 256 \
@@ -457,7 +459,7 @@ elif [ $mode = 'eval' ]; then
     # before this mode, make sure you run the translate mode to generate the pred.txt file for evaluating.
     CUDA_VISIBLE_DEVICES="$CUDA" python -W ignore eval.py \
         --model $model \
-        --file ./processed/${dataset}/${model}/pure-pred.txt
+        --file ./processed/${dataset}/${model}/${kernel_v}/pure-pred.txt
         
 elif [ $mode = 'curve' ]; then
     # this part of codes is useless (tensorboard is all you need)
@@ -479,6 +481,8 @@ elif [ $mode = 'curve' ]; then
             --utter_hidden 500 \
             --context_hidden 500 \
             --decoder_hidden 500 \
+            --kernel_v $kernel_v \
+            --kernel_r 0.0001 \
             --seed 20 \
             --embed_size 300 \
             --d_model 500 \
