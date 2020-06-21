@@ -130,8 +130,8 @@ def sent2glove(vocab, sent):
 # ================================================================================= #
     
 
-def load_best_model(dataset, model, net, min_threshold, max_threshold):
-    path = f'./ckpt/{dataset}/{model}/'
+def load_best_model(dataset, model, kernel_v, net, min_threshold, max_threshold):
+    path = f'./ckpt/{dataset}/{model}/{kernel_v}/'
     best_loss, best_file, best_epoch = np.inf, None, -1
 
     for file in os.listdir(path):

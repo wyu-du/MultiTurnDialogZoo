@@ -244,7 +244,7 @@ def translate(**kwargs):
     print(f'[!] Parameters size: {sum(x.numel() for x in net.parameters())}')
 
     # load best model
-    load_best_model(kwargs['dataset'], kwargs['model'], 
+    load_best_model(kwargs['dataset'], kwargs['model'], kwargs['kernel_v'], 
                     net, min_threshold=kwargs['min_threshold'],
                     max_threshold=kwargs["max_threshold"])
                         
