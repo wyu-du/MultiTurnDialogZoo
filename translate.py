@@ -20,6 +20,7 @@ from utils import *
 from data_loader import *
 from metric.metric import *
 from model.seq2seq_attention import Seq2Seq
+from model.seq2seq_gp import Seq2Seq_Full, Seq2Seq_Half
 from model.seq2seq_multi_head_attention import Seq2Seq_Multi_Head
 from model.seq2seq_transformer import Transformer
 from model.HRED import HRED
@@ -186,7 +187,7 @@ def translate(**kwargs):
                       utter_n_layer=kwargs['utter_n_layer'], 
                       pretrained=pretrained)
     elif kwargs['model'] == 'Seq2Seq_Full':
-        net = Seq2Seq(len(src_w2idx), kwargs['embed_size'], len(tgt_w2idx), 
+        net = Seq2Seq_Full(len(src_w2idx), kwargs['embed_size'], len(tgt_w2idx), 
                       kwargs['utter_hidden' ], 
                       kwargs['decoder_hidden'], 
                       kwargs['latent_size'], kwargs['kernel_v'], kwargs['kernel_r'], 
