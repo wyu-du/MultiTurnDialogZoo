@@ -179,7 +179,18 @@ def translate(**kwargs):
     elif kwargs['model'] == 'Seq2Seq':
         net = Seq2Seq(len(src_w2idx), kwargs['embed_size'], len(tgt_w2idx), 
                       kwargs['utter_hidden' ], 
-                      kwargs['decoder_hidden'], teach_force=kwargs['teach_force'],
+                      kwargs['decoder_hidden'], 
+                      teach_force=kwargs['teach_force'],
+                      pad=tgt_w2idx['<pad>'], sos=tgt_w2idx['<sos>'],
+                      dropout=kwargs['dropout'], 
+                      utter_n_layer=kwargs['utter_n_layer'], 
+                      pretrained=pretrained)
+    elif kwargs['model'] == 'Seq2Seq_Full':
+        net = Seq2Seq(len(src_w2idx), kwargs['embed_size'], len(tgt_w2idx), 
+                      kwargs['utter_hidden' ], 
+                      kwargs['decoder_hidden'], 
+                      kwargs['latent_size'], kwargs['kernel_v'], kwargs['kernel_r'], 
+                      teach_force=kwargs['teach_force'],
                       pad=tgt_w2idx['<pad>'], sos=tgt_w2idx['<sos>'],
                       dropout=kwargs['dropout'], 
                       utter_n_layer=kwargs['utter_n_layer'], 
@@ -351,6 +362,12 @@ if __name__ == "__main__":
     parser.add_argument('--utter_n_layer', type=int, default=1, help='layer of encoder')
     parser.add_argument('--utter_hidden', type=int, default=150, 
                         help='utterance encoder hidden size')
+    parser.add_argument('--latent_size', type=int, default=256, 
+                        help='latent variable size')
+    parser.add_argument('--kernel_v', type=float, default=1.0, 
+                        help='kernel param v')
+    parser.add_argument('--kernel_r', type=float, default=0.0001, 
+                        help='kernel param r')
     parser.add_argument('--context_hidden', type=int, default=150, 
                         help='context encoder hidden size')
     parser.add_argument('--decoder_hidden', type=int, default=150, 
