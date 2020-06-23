@@ -405,8 +405,10 @@ class Seq2Seq_Normal(nn.Module):
 
             encoder_output, hidden = self.encoder(src, lengths)
             
-            mean = self.mean(encoder_output)
-            encoder_output = self.latent2hidden(mean)
+            mean = self.mean(encoder_output) # L x B x K
+            logvar = self.logvar(encoder_output)
+            z = self.reparameterize(mean, logvar)
+            encoder_output = self.latent2hidden(z)
             
             hidden = hidden[-self.utter_n_layer:]
             output = torch.zeros(batch_size, dtype=torch.long).fill_(self.sos)
@@ -533,8 +535,10 @@ class Seq2Seq_Vamp(nn.Module):
 
             encoder_output, hidden = self.encoder(src, lengths)
             
-            mean = self.mean(encoder_output)
-            encoder_output = self.latent2hidden(mean)
+            mean = self.mean(encoder_output) # L x B x K
+            logvar = self.logvar(encoder_output)
+            z = self.reparameterize(mean, logvar)
+            encoder_output = self.latent2hidden(z)
             
             hidden = hidden[-self.utter_n_layer:]
             output = torch.zeros(batch_size, dtype=torch.long).fill_(self.sos)
