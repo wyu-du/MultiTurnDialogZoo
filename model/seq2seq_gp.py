@@ -482,7 +482,7 @@ class Seq2Seq_Vamp(nn.Module):
         self.components = 10
         self.pseudo_inputs = torch.ones((self.components, 1), dtype=torch.long) * self.pad
         if self.using_cuda: self.pseudo_inputs = self.pseudo_inputs.cuda()
-        self.pseudo_embed = nn.Linear(self.embed_size, self.embed_size)
+        self.pseudo_embed = nn.Linear(embed_size, embed_size)
         
     def forward(self, src, tgt, lengths):
         # src: [lengths, batch], tgt: [lengths, batch], lengths: [batch]
