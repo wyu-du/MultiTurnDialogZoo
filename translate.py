@@ -20,7 +20,7 @@ from utils import *
 from data_loader import *
 from metric.metric import *
 from model.seq2seq_attention import Seq2Seq
-from model.seq2seq_gp import Seq2Seq_Full, Seq2Seq_Half
+from model.seq2seq_gp import Seq2Seq_Full, Seq2Seq_Normal, Seq2Seq_Vamp
 from model.seq2seq_multi_head_attention import Seq2Seq_Multi_Head
 from model.seq2seq_transformer import Transformer
 from model.HRED import HRED
@@ -191,6 +191,26 @@ def translate(**kwargs):
                       kwargs['utter_hidden' ], 
                       kwargs['decoder_hidden'], 
                       kwargs['latent_size'], kwargs['kernel_v'], kwargs['kernel_r'], 
+                      teach_force=kwargs['teach_force'],
+                      pad=tgt_w2idx['<pad>'], sos=tgt_w2idx['<sos>'],
+                      dropout=kwargs['dropout'], 
+                      utter_n_layer=kwargs['utter_n_layer'], 
+                      pretrained=pretrained)
+    elif kwargs['model'] == 'Seq2Seq_Normal':
+        net = Seq2Seq_Normal(len(src_w2idx), kwargs['embed_size'], len(tgt_w2idx), 
+                      kwargs['utter_hidden' ], 
+                      kwargs['decoder_hidden'], 
+                      kwargs['latent_size'], 
+                      teach_force=kwargs['teach_force'],
+                      pad=tgt_w2idx['<pad>'], sos=tgt_w2idx['<sos>'],
+                      dropout=kwargs['dropout'], 
+                      utter_n_layer=kwargs['utter_n_layer'], 
+                      pretrained=pretrained)
+    elif kwargs['model'] == 'Seq2Seq_Vamp':
+        net = Seq2Seq_Vamp(len(src_w2idx), kwargs['embed_size'], len(tgt_w2idx), 
+                      kwargs['utter_hidden' ], 
+                      kwargs['decoder_hidden'], 
+                      kwargs['latent_size'], 
                       teach_force=kwargs['teach_force'],
                       pad=tgt_w2idx['<pad>'], sos=tgt_w2idx['<sos>'],
                       dropout=kwargs['dropout'], 

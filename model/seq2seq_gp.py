@@ -323,19 +323,20 @@ class Seq2Seq_Full(nn.Module):
             kld = zeros
         return kld
     
+    
 
-class Seq2Seq_Half(nn.Module):
+class Seq2Seq_Normal(nn.Module):
     
     '''
     Compose the Encoder and Decoder into the Seq2Seq model
     '''
     
     def __init__(self, input_size, embed_size, output_size, 
-                 utter_hidden, decoder_hidden, latent_size, v, r, 
+                 utter_hidden, decoder_hidden, latent_size,  
                  teach_force=0.5, pad=24745, sos=24742, dropout=0.5, 
                  utter_n_layer=1, src_vocab=None, tgt_vocab=None,
                  pretrained=None):
-        super(Seq2Seq_Half, self).__init__()
+        super(Seq2Seq_Normal, self).__init__()
         self.encoder = Encoder(input_size, embed_size, utter_hidden,
                                n_layers=utter_n_layer, 
                                dropout=dropout,
@@ -354,13 +355,6 @@ class Seq2Seq_Half(nn.Module):
         self.mean = nn.Linear(self.encoder.hidden_size, self.latent_size)
         self.logvar = nn.Linear(self.encoder.hidden_size, self.latent_size)
         self.latent2hidden = nn.Linear(self.latent_size, self.decoder.hidden_size)
-        
-        # parameters for kernel
-        self.kernel_v = torch.ones(1) * v
-        self.kernel_r = torch.ones(1) * r
-        if self.using_cuda:
-            self.kernel_v = self.kernel_v.cuda()
-            self.kernel_r = self.kernel_r.cuda()
         
     def forward(self, src, tgt, lengths):
         # src: [lengths, batch], tgt: [lengths, batch], lengths: [batch]
@@ -395,9 +389,7 @@ class Seq2Seq_Half(nn.Module):
                 outputs[t] = output
                 output = output.topk(1)[1].squeeze().detach()
         
-        p_mean, p_var = self.compute_prior(encoder_output)
-        q_mean, q_var = self.compute_posterior(mean, logvar)
-        kld = self.compute_kld(p_mean, p_var, q_mean, q_var) # B
+        kld = self.compute_kld(mean, logvar) # B
         kld = torch.mean(kld)
         
         return outputs, kld
@@ -442,70 +434,177 @@ class Seq2Seq_Half(nn.Module):
         eps = Variable(eps)
         return eps.mul(std).add_(mu)
     
-    def compute_prior(self, enc_output):
-        """
-        local prior p(z|x) = N(mu(x), K(x, x'))
+    def compute_kld(self, mean, logvar):
+        mean = mean.transpose(0,1) # B x L x K
+        logvar = logvar.transpose(0,1) # B x L x K
         
-        enc_output - L x B x H
-        """
-        l, b, h = list(enc_output.size())
-        mean = enc_output.sum(dim=2) # L x B
-        mean = mean.transpose(0, 1)  # B x L
-        var = torch.zeros((b, l, l), requires_grad=False) # B x L x L
-        if self.using_cuda: var = var.cuda()
-        var = self.kernel_v * var
-#        for i in range(l):
-#            for j in range(l):
-#                if j>= i:
-#                    var[:, i, j] = self.kernel_func(enc_output[i,:,:], enc_output[j,:,:])
-        return mean, var
-    
-    def kernel_func(self, x, y):
-        """
-        x, y - B x H
-        """
-        cov_xy = self.kernel_v * torch.exp(-0.5 * torch.sum(torch.pow((x - y)/self.kernel_r, 2), dim=1))
-        return cov_xy
-    
-    def compute_posterior(self, mean, logvar):
-        """
-        variational posterior q(z|x) = N(mu(x), f(x)*f(x))
-        
-        mean, logvar - L x B x K
-        """
-        mean = mean.sum(dim=2) # L x B
-        mean = mean.transpose(0, 1)  # B x L
-        x_var = torch.exp(logvar).sum(dim=2) # L x B
-        x_var = x_var.transpose(0, 1)  # B x L
-        
-        var_batch = []
-        for b in range(mean.size(0)):
-            identity_matrix = torch.eye(x_var.size(1))
-            if self.using_cuda: identity_matrix = identity_matrix.cuda()
-            var_batch.append(x_var[b]*identity_matrix)
-        var = torch.stack(var_batch, dim=0) # B x L x L
-        return mean, var
-        
-    def compute_kld(self, p_mean, p_var, q_mean, q_var):
-        k = p_var.size(1)
-        
-        log_det = torch.logdet(p_var) - torch.logdet(q_var) 
-        if torch.isnan(log_det).int().sum() > 0:
-            if torch.isnan(q_var).int().sum() > 0:
-                print('q_var has nan!!!')
-                print(q_var)
-        
-        p_var_inv = torch.inverse(p_var) # B x L x L
-        trace_batch = torch.matmul(p_var_inv, q_var) # B x L x L
-        trace_list = [torch.trace(trace_batch[i]) for i in range(trace_batch.size(0))]
-        trace = torch.stack(trace_list, dim=0) # B
-        
-        mean_diff = p_mean.unsqueeze(2) - q_mean.unsqueeze(2) # B x L x 1
-        mean = torch.matmul(torch.matmul(mean_diff.transpose(1,2), p_var_inv), mean_diff) # B x 1 x 1
-        
-        kld = log_det - k + trace + mean.squeeze()
-        kld = 0.5 * kld # B
+        k = mean.size(2)
+        log_det = - logvar.sum(dim=2) # B x L
+        trace = torch.sum(torch.exp(logvar), dim=2)
+        mean = torch.sum(torch.pow(mean, 2), dim=2)
+        kld = log_det - k + trace + mean
+        kld = 0.5 * kld.sum(dim=1) # B
         return kld
+    
+    
+    
+class Seq2Seq_Vamp(nn.Module):
+    
+    '''
+    Compose the Encoder and Decoder into the Seq2Seq model
+    '''
+    
+    def __init__(self, input_size, embed_size, output_size, 
+                 utter_hidden, decoder_hidden, latent_size,  
+                 teach_force=0.5, pad=24745, sos=24742, dropout=0.5, 
+                 utter_n_layer=1, src_vocab=None, tgt_vocab=None,
+                 pretrained=None):
+        super(Seq2Seq_Vamp, self).__init__()
+        self.encoder = Encoder(input_size, embed_size, utter_hidden,
+                               n_layers=utter_n_layer, 
+                               dropout=dropout,
+                               pretrained=pretrained)
+        self.decoder = Decoder(embed_size, decoder_hidden, 
+                               output_size, n_layers=utter_n_layer,
+                               dropout=dropout,
+                               pretrained=pretrained)
+        self.teach_force = teach_force
+        self.utter_n_layer = utter_n_layer
+        self.pad, self.sos = pad, sos
+        self.output_size = output_size
+        
+        self.latent_size = latent_size
+        self.using_cuda = torch.cuda.is_available()
+        self.mean = nn.Linear(self.encoder.hidden_size, self.latent_size)
+        self.logvar = nn.Linear(self.encoder.hidden_size, self.latent_size)
+        self.latent2hidden = nn.Linear(self.latent_size, self.decoder.hidden_size)
+        
+        self.components = 10
+        self.pseudo_inputs = torch.ones((self.components, 1), dtype=torch.long) * self.pad
+        if self.using_cuda: self.pseudo_inputs = self.pseudo_inputs.cuda()
+        self.pseudo_embed = nn.Linear(self.embed_size, self.embed_size)
+        
+    def forward(self, src, tgt, lengths):
+        # src: [lengths, batch], tgt: [lengths, batch], lengths: [batch]
+        # ipdb.set_trace()
+        batch_size, max_len = src.shape[1], tgt.shape[0]
+        
+        outputs = torch.zeros(max_len, batch_size, self.output_size)
+        if torch.cuda.is_available():
+            outputs = outputs.cuda()
+        
+        # encoder_output: [seq_len, batch, hidden_size]
+        # hidden: [1, batch, hidden_size]
+        encoder_output, hidden = self.encoder(src, lengths)
+        
+        mean = self.mean(encoder_output) # L x B x K
+        logvar = self.logvar(encoder_output)
+        z = self.reparameterize(mean, logvar)
+        encoder_output = self.latent2hidden(z) # L x B x H
+        
+        hidden = hidden[-self.utter_n_layer:]
+        output = tgt[0, :]
+        
+        use_teacher = random.random() < self.teach_force
+        if use_teacher:
+            for t in range(1, max_len):
+                output, hidden = self.decoder(output, hidden, encoder_output)
+                outputs[t] = output
+                output = tgt[t] # [max_len, batch, output_size]
+        else:
+            for t in range(1, max_len):
+                output, hidden = self.decoder(output, hidden, encoder_output)
+                outputs[t] = output
+                output = output.topk(1)[1].squeeze().detach()
+        
+        kld = self.compute_kld(z, mean, logvar) # B
+        kld = torch.mean(kld)
+        
+        return outputs, kld
+    
+    def predict(self, src, maxlen, lengths, loss=True):
+        with torch.no_grad():
+            batch_size = src.shape[1]
+            outputs = torch.zeros(maxlen, batch_size)
+            floss = torch.zeros(maxlen, batch_size, self.output_size)
+            if torch.cuda.is_available():
+                outputs = outputs.cuda()
+                floss = floss.cuda()
+
+            encoder_output, hidden = self.encoder(src, lengths)
+            
+            mean = self.mean(encoder_output)
+            encoder_output = self.latent2hidden(mean)
+            
+            hidden = hidden[-self.utter_n_layer:]
+            output = torch.zeros(batch_size, dtype=torch.long).fill_(self.sos)
+            if torch.cuda.is_available():
+                output = output.cuda()
+
+            for t in range(1, maxlen):
+                output, hidden = self.decoder(output, hidden, encoder_output)
+                floss[t] = output
+                # output = torch.max(output, 1)[1]    # [1]
+                output = output.topk(1)[1].squeeze()
+                outputs[t] = output    # output: [1, output_size]
+
+            if loss:
+                return outputs, floss
+            else:
+                return outputs 
+            
+    def reparameterize(self, mu, logvar):
+        std = logvar.mul(0.5).exp_()
+        if self.using_cuda:
+            eps = torch.cuda.FloatTensor(std.size()).normal_()
+        else:
+            eps = torch.FloatTensor(std.size()).normal_()
+        eps = Variable(eps)
+        return eps.mul(std).add_(mu)
+    
+    def compute_kld(self, z, mean, logvar):
+        z = z.transpose(0,1) # B x L x K
+        mean = mean.transpose(0,1) # B x L x K
+        logvar = logvar.transpose(0,1) # B x L x K
+        
+        log_q_z = self.log_Normal_diag(z, mean, logvar, dim=2)
+        log_p_z = self.log_p_z(z)
+        
+        kld = log_q_z - log_p_z # B x L
+        return kld.sum(dim=1)
+    
+    def log_p_z(self, z):
+        if self.using_cuda:
+            C = torch.cuda.FloatTensor([self.components])
+        else:
+            C = torch.FloatTensor([self.components])
+            
+        embed = self.pseudo_embed(self.encoder.embed(self.pseudo_inputs)) # C x 1 x E
+        embed = embed.transpose(0,1) # 1 x C x E
+        hidden = torch.randn(2 * self.encoder.n_layer, embed.size(1), self.encoder.hidden_size)
+        if self.using_cuda: hidden = hidden.cuda()
+        # hidden: [2 * n_layer, batch, hidden]
+        # output: [seq_len, batch, 2 * hidden_size]
+        output, hidden = self.encoder.rnn(embed, hidden)
+        output = output[:, :, :self.encoder.hidden_size] + output[:, :, self.encoder.hidden_size:]
+        
+        pseudo_means = self.mean(output) # 1 x C x 2H
+        pseudo_logvar = self.logvar(output)
+        pseudo_means = pseudo_means.unsqueeze(0) # 1 x 1 x C x 2H
+        pseudo_logvar = pseudo_logvar.unsqueeze(0) # 1 x 1 x C x 2H
+        
+        b, l, h = list(z.size())
+        z_expand = z.unsqueeze(2).expand(b, l, self.components, h).contiguous() # B x L x C x 2H
+        a = self.log_Normal_diag(z_expand, pseudo_means, pseudo_logvar, dim=3) - torch.log(C)  # B x L x C
+        a_max, _ = torch.max(a, 2)  # B x L
+
+        # calculte log-sum-exp
+        log_prior = a_max + torch.log(torch.sum(torch.exp(a - a_max.unsqueeze(2)), 2))  # B x L
+        return log_prior
+    
+    def log_Normal_diag(self, x, mean, log_var, dim=None):
+        log_normal = -0.5 * (log_var + torch.pow(x - mean, 2) / torch.exp(log_var))
+        return torch.sum(log_normal, dim)
     
 
 if __name__ == "__main__":
