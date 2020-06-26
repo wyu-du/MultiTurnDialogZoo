@@ -320,6 +320,7 @@ elif [ $mode = 'train' ]; then
         --teach_force 1 \
         --context_hidden 512 \
         --decoder_hidden 512 \
+        --latent_size 256 \
         --kernel_v $kernel_v \
         --kernel_r 0.0001 \
         --embed_size 256 \
@@ -386,6 +387,7 @@ elif [ $mode = 'translate' ]; then
         --utter_hidden 512 \
         --context_hidden 512 \
         --decoder_hidden 512 \
+        --latent_size 256 \
         --kernel_v $kernel_v \
         --kernel_r 0.0001 \
         --seed 30 \
@@ -481,6 +483,7 @@ elif [ $mode = 'curve' ]; then
             --utter_hidden 500 \
             --context_hidden 500 \
             --decoder_hidden 500 \
+            --latent_size 256 \
             --kernel_v $kernel_v \
             --kernel_r 0.0001 \
             --seed 20 \
