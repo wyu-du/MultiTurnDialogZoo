@@ -227,7 +227,7 @@ class Seq2Seq_Full(nn.Module):
             
             mean = self.mean(encoder_output) # L x B x K
             logvar = self.logvar(encoder_output)
-            z = self.reparameterize(mean, logvar)
+            z = self.reparameterize(mean, logvar, 10)
             encoder_output = self.latent2hidden(z) # L x B x H
             
             hidden = hidden[-self.utter_n_layer:]
@@ -247,8 +247,8 @@ class Seq2Seq_Full(nn.Module):
             else:
                 return outputs # L x B
             
-    def reparameterize(self, mu, logvar):
-        std = logvar.mul(0.5).exp_()
+    def reparameterize(self, mu, logvar, scaler=1.0):
+        std = logvar.mul(0.5).exp_() * scaler
         if self.using_cuda:
             eps = torch.cuda.FloatTensor(std.size()).normal_()
         else:
