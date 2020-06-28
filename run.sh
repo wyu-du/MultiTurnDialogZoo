@@ -434,7 +434,7 @@ elif [ $mode = 'translate' ]; then
             --latent_size 256 \
             --kernel_v $kernel_v \
             --kernel_r 0.0001 \
-            --seed 100 \
+            --seed $i \
             --dropout $dropout \
             --embed_size 256 \
             --d_model 512 \
