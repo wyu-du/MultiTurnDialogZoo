@@ -402,7 +402,7 @@ elif [ $mode = 'translate' ]; then
         --src_vocab $src_vocab \
         --tgt_vocab $tgt_vocab \
         --maxlen $maxlen \
-        --pred ./processed/${dataset}/${model}/${kernel_v}/pure-pred.txt \
+        --pred ./processed/${dataset}/${model}/${kernel_v}/mean-pred.txt \
         --hierarchical $hierarchical \
         --tgt_maxlen $tgtmaxlen \
         --graph $graph \
@@ -417,45 +417,48 @@ elif [ $mode = 'translate' ]; then
         
     # exit    # comment this line for ppl perturbation test, or only translate the test dataset 
     # 10 perturbation
-#    for i in {1..10}
-#    do
-#        echo "========== running the perturbation $i =========="
-#        CUDA_VISIBLE_DEVICES="$CUDA" python -W ignore translate.py \
-#            --src_test ./data/$dataset/src-test-perturbation-${i}.txt \
-#           --tgt_test ./data/$dataset/tgt-test.txt \
-#            --min_threshold 0 \
-#            --max_threshold 100 \
-#            --batch_size $batch_size \
-#            --model $model \
-#            --utter_n_layer 2 \
-#            --utter_hidden 512 \
-#            --context_hidden 512 \
-#            --decoder_hidden 512 \
-#            --seed 30 \
-#            --dropout $dropout \
-#            --embed_size 256 \
-#            --d_model 512 \
-#            --nhead 4 \
-#            --num_encoder_layers 8 \
-#            --num_decoder_layers 8 \
-#            --dim_feedforward 2048 \
-#            --dataset $dataset \
-#            --src_vocab $src_vocab \
-#            --tgt_vocab $tgt_vocab \
-#            --maxlen $maxlen \
-#            --pred ./processed/${dataset}/${model}/perturbation-${i}-pred.txt \
-#            --hierarchical $hierarchical \
-#            --tgt_maxlen $tgtmaxlen \
-#            --graph $graph \
-#            --test_graph ./processed/$dataset/test-graph-perturbation-${i}.pkl \
-#            --position_embed_size 30 \
-#            --contextrnn \
-#            --plus 0 \
-#            --context_threshold 2 \
-#            --ppl origin \
-#            --gat_heads 8 \
-#            --teach_force 1
-#    done
+    for i in {1..10}
+    do
+        echo "========== running the perturbation $i =========="
+        CUDA_VISIBLE_DEVICES="$CUDA" python -W ignore translate.py \
+            --src_test ./data/$dataset/src-test.txt \
+            --tgt_test ./data/$dataset/tgt-test.txt \
+            --min_threshold 0 \
+            --max_threshold 100 \
+            --batch_size $batch_size \
+            --model $model \
+            --utter_n_layer 2 \
+            --utter_hidden 512 \
+            --context_hidden 512 \
+            --decoder_hidden 512 \
+            --latent_size 256 \
+            --kernel_v $kernel_v \
+            --kernel_r 0.0001 \
+            --seed 100 \
+            --dropout $dropout \
+            --embed_size 256 \
+            --d_model 512 \
+            --nhead 4 \
+            --num_encoder_layers 8 \
+            --num_decoder_layers 8 \
+            --dim_feedforward 2048 \
+            --dataset $dataset \
+            --src_vocab $src_vocab \
+            --tgt_vocab $tgt_vocab \
+            --maxlen $maxlen \
+            --pred ./processed/${dataset}/${model}/${kernel_v}/sample-${i}-pred.txt \
+            --hierarchical $hierarchical \
+            --tgt_maxlen $tgtmaxlen \
+            --graph $graph \
+            --test_graph ./processed/$dataset/test-graph.pkl \
+            --position_embed_size 30 \
+            --contextrnn \
+            --plus 0 \
+            --context_threshold 2 \
+            --ppl origin \
+            --gat_heads 8 \
+            --teach_force 1
+    done
 
 elif [ $mode = 'eval' ]; then
     # before this mode, make sure you run the translate mode to generate the pred.txt file for evaluating.

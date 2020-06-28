@@ -435,10 +435,11 @@ if __name__ == "__main__":
     print(args)
     
     # set random seed
-    random.seed(args.seed)
-    torch.manual_seed(args.seed)
-    if torch.cuda.is_available():
-        torch.cuda.manual_seed_all(args.seed)
+    if args.seed != 100:
+        random.seed(args.seed)
+        torch.manual_seed(args.seed)
+        if torch.cuda.is_available():
+            torch.cuda.manual_seed_all(args.seed)
         
     # translate
     args_dict = vars(args)    

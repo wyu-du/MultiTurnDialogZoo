@@ -225,8 +225,10 @@ class Seq2Seq_Full(nn.Module):
 
             encoder_output, hidden = self.encoder(src, lengths)
             
-            mean = self.mean(encoder_output)
-            encoder_output = self.latent2hidden(mean)
+            mean = self.mean(encoder_output) # L x B x K
+            logvar = self.logvar(encoder_output)
+            z = self.reparameterize(mean, logvar)
+            encoder_output = self.latent2hidden(z) # L x B x H
             
             hidden = hidden[-self.utter_n_layer:]
             output = torch.zeros(batch_size, dtype=torch.long).fill_(self.sos)
@@ -238,12 +240,12 @@ class Seq2Seq_Full(nn.Module):
                 floss[t] = output
                 # output = torch.max(output, 1)[1]    # [1]
                 output = output.topk(1)[1].squeeze()
-                outputs[t] = output    # output: [1, output_size]
+                outputs[t] = output    # output: [batch_size]
 
             if loss:
                 return outputs, floss
             else:
-                return outputs 
+                return outputs # L x B
             
     def reparameterize(self, mu, logvar):
         std = logvar.mul(0.5).exp_()
