@@ -174,10 +174,10 @@ def get_batch_data_flatten(src, tgt, src_vocab, tgt_vocab, batch_size, maxlen, t
         bidx = fidx + batch_size
         sbatch, tbatch = src_dataset[fidx:bidx], tgt_dataset[fidx:bidx]
         # shuffle
-        shuffleidx = np.arange(0, len(sbatch))
-        np.random.shuffle(shuffleidx)
-        sbatch = [sbatch[idx] for idx in shuffleidx]
-        tbatch = [tbatch[idx] for idx in shuffleidx]
+#        shuffleidx = np.arange(0, len(sbatch))
+#        np.random.shuffle(shuffleidx)
+#        sbatch = [sbatch[idx] for idx in shuffleidx]
+#        tbatch = [tbatch[idx] for idx in shuffleidx]
         
         bs = len(sbatch)
 
