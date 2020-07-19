@@ -69,7 +69,7 @@ def load_data_flatten(src, tgt, src_vocab, tgt_vocab, maxlen, tgt_maxlen):
 
 
 def get_batch_data(src, tgt, src_vocab, tgt_vocab, batch_size, maxlen, tgt_maxlen,
-                   plus=0, ld=True):
+                   plus=0, ld=True, mode='train'):
     # batch and convert to tensor for training
     # batch according to the turns
     # [datasize, turns, lengths], [datasize, lengths]
@@ -77,12 +77,14 @@ def get_batch_data(src, tgt, src_vocab, tgt_vocab, batch_size, maxlen, tgt_maxle
     tgt_w2idx, tgt_idx2w = load_pickle(tgt_vocab)
     
     src_dataset, _, tgt_dataset, _ = load_data(src, tgt, src_vocab, tgt_vocab, maxlen, tgt_maxlen, ld=ld)
-    turns = [len(dialog) for dialog in src_dataset]
-    turnidx = np.argsort(turns)
-    # sort by the lengrh of the turns
-    src_dataset = [src_dataset[idx] for idx in turnidx]
-    tgt_dataset = [tgt_dataset[idx] for idx in turnidx]
-    # print(f'[!] dataset size: {len(src_dataset)}')
+    
+    if mode == 'train':
+        turns = [len(dialog) for dialog in src_dataset]
+        turnidx = np.argsort(turns)
+        # sort by the lengrh of the turns
+        src_dataset = [src_dataset[idx] for idx in turnidx]
+        tgt_dataset = [tgt_dataset[idx] for idx in turnidx]
+        # print(f'[!] dataset size: {len(src_dataset)}')
 
     # batch and convert to tensor
     turns = [len(dialog) for dialog in src_dataset]
@@ -100,17 +102,18 @@ def get_batch_data(src, tgt, src_vocab, tgt_vocab, batch_size, maxlen, tgt_maxle
         # print(fidx, bidx)
 
         # batch, [batch, turns, lengths], [batch, lengths]
-        # shuffle
         sbatch, tbatch = src_dataset[fidx:bidx], tgt_dataset[fidx:bidx]
         
         if len(sbatch[0]) <= plus:
             fidx = bidx
             continue
         
-#        shuffleidx = np.arange(0, len(sbatch))
-#        np.random.shuffle(shuffleidx)
-#        sbatch = [sbatch[idx] for idx in shuffleidx]
-#        tbatch = [tbatch[idx] for idx in shuffleidx]
+        if mode == 'train':
+            # shuffle
+            shuffleidx = np.arange(0, len(sbatch))
+            np.random.shuffle(shuffleidx)
+            sbatch = [sbatch[idx] for idx in shuffleidx]
+            tbatch = [tbatch[idx] for idx in shuffleidx]
 
         # convert to [turns, batch, lengths], [batch, lengths]
         sbatch = transformer_list(sbatch)
@@ -150,7 +153,7 @@ def get_batch_data(src, tgt, src_vocab, tgt_vocab, batch_size, maxlen, tgt_maxle
         yield sbatch, tbatch, turn_lengths
 
 
-def get_batch_data_flatten(src, tgt, src_vocab, tgt_vocab, batch_size, maxlen, tgt_maxlen):
+def get_batch_data_flatten(src, tgt, src_vocab, tgt_vocab, batch_size, maxlen, tgt_maxlen, mode='train'):
     # flatten batch data for unHRED-based models (Seq2Seq)
     # return long context for predicting response
     # [datasize, turns, lengths], [datasize, lengths]
@@ -160,12 +163,13 @@ def get_batch_data_flatten(src, tgt, src_vocab, tgt_vocab, batch_size, maxlen, t
     # [datasize, lengths], [datasize, lengths]
     src_dataset, tgt_dataset = load_data_flatten(src, tgt, src_vocab, tgt_vocab, maxlen, tgt_maxlen)
 
-    turns = [len(i) for i in src_dataset]
-    turnsidx = np.argsort(turns)
-
-    # sort by the lengths
-    src_dataset = [src_dataset[i] for i in turnsidx]
-    tgt_dataset = [tgt_dataset[i] for i in turnsidx]
+    if mode == 'train':
+        turns = [len(i) for i in src_dataset]
+        turnsidx = np.argsort(turns)
+    
+        # sort by the lengths
+        src_dataset = [src_dataset[i] for i in turnsidx]
+        tgt_dataset = [tgt_dataset[i] for i in turnsidx]
 
     # generate the batch
     turns = [len(i) for i in src_dataset]
@@ -173,11 +177,13 @@ def get_batch_data_flatten(src, tgt, src_vocab, tgt_vocab, batch_size, maxlen, t
     while fidx < len(src_dataset):
         bidx = fidx + batch_size
         sbatch, tbatch = src_dataset[fidx:bidx], tgt_dataset[fidx:bidx]
-        # shuffle
-#        shuffleidx = np.arange(0, len(sbatch))
-#        np.random.shuffle(shuffleidx)
-#        sbatch = [sbatch[idx] for idx in shuffleidx]
-#        tbatch = [tbatch[idx] for idx in shuffleidx]
+        
+        if mode == 'train':
+            # shuffle
+            shuffleidx = np.arange(0, len(sbatch))
+            np.random.shuffle(shuffleidx)
+            sbatch = [sbatch[idx] for idx in shuffleidx]
+            tbatch = [tbatch[idx] for idx in shuffleidx]
         
         bs = len(sbatch)
 
@@ -222,7 +228,7 @@ def load_data_flatten_tf(src, tgt, maxlen, tokenizer):
     return src_corpus, tgt_corpus
     
         
-def get_batch_data_flatten_tf(src, tgt, batch_size, maxlen):
+def get_batch_data_flatten_tf(src, tgt, batch_size, maxlen, mode='train'):
     '''
     1. No turn_lengths because of transformer
     2. src_key_padding_mask and tgt_key_padding_mask
@@ -234,12 +240,13 @@ def get_batch_data_flatten_tf(src, tgt, batch_size, maxlen):
     # [datasize, lengths], [datasize, lengths]
     src_dataset, tgt_dataset = load_data_flatten_tf(src, tgt, maxlen, tokenizer)
 
-    turns = [len(i) for i in src_dataset]
-    turnsidx = np.argsort(turns)
-
-    # sort by the lengths
-    src_dataset = [src_dataset[i] for i in turnsidx]
-    tgt_dataset = [tgt_dataset[i] for i in turnsidx]
+    if mode == 'train':
+        turns = [len(i) for i in src_dataset]
+        turnsidx = np.argsort(turns)
+    
+        # sort by the lengths
+        src_dataset = [src_dataset[i] for i in turnsidx]
+        tgt_dataset = [tgt_dataset[i] for i in turnsidx]
 
     # generate the batch
     turns = [len(i) for i in src_dataset]
@@ -247,11 +254,13 @@ def get_batch_data_flatten_tf(src, tgt, batch_size, maxlen):
     while fidx < len(src_dataset):
         bidx = fidx + batch_size
         sbatch, tbatch = src_dataset[fidx:bidx], tgt_dataset[fidx:bidx]
-        # shuffle
-#        shuffleidx = np.arange(0, len(sbatch))
-#        np.random.shuffle(shuffleidx)
-#        sbatch = [sbatch[idx] for idx in shuffleidx]
-#        tbatch = [tbatch[idx] for idx in shuffleidx]
+        
+        if mode == 'train':
+            # shuffle
+            shuffleidx = np.arange(0, len(sbatch))
+            np.random.shuffle(shuffleidx)
+            sbatch = [sbatch[idx] for idx in shuffleidx]
+            tbatch = [tbatch[idx] for idx in shuffleidx]
         
         bs = len(sbatch)
 
@@ -272,7 +281,7 @@ def get_batch_data_flatten_tf(src, tgt, batch_size, maxlen):
         
         
 def get_batch_data_graph(src, tgt, graph, src_vocab, tgt_vocab, 
-                         batch_size, maxlen, tgt_maxlen, plus=0):
+                         batch_size, maxlen, tgt_maxlen, plus=0, mode='train'):
     '''get batch data of hierarchical and graph mode
     return data:
     - sbatch: [turn, batch, length]
@@ -286,16 +295,17 @@ def get_batch_data_graph(src, tgt, graph, src_vocab, tgt_vocab,
     src_dataset, src_user, tgt_dataset, tgt_user = load_data(src, tgt, src_vocab, tgt_vocab, maxlen, tgt_maxlen)
     graph = load_pickle(graph)
     
-    turns = [len(dialog) for dialog in src_dataset]
-    turnidx = np.argsort(turns)
-    
-    # sort by the lengrh of the turns
-    src_dataset = [src_dataset[idx] for idx in turnidx]
-    tgt_dataset = [tgt_dataset[idx] for idx in turnidx]
-    graph = [graph[idx] for idx in turnidx]
-    src_user = [src_user[idx] for idx in turnidx]
-    tgt_user = [tgt_user[idx] for idx in turnidx]
-    # print(f'[!] dataset size: {len(src_dataset)}')
+    if mode == 'train':
+        turns = [len(dialog) for dialog in src_dataset]
+        turnidx = np.argsort(turns)
+        
+        # sort by the lengrh of the turns
+        src_dataset = [src_dataset[idx] for idx in turnidx]
+        tgt_dataset = [tgt_dataset[idx] for idx in turnidx]
+        graph = [graph[idx] for idx in turnidx]
+        src_user = [src_user[idx] for idx in turnidx]
+        tgt_user = [tgt_user[idx] for idx in turnidx]
+        # print(f'[!] dataset size: {len(src_dataset)}')
 
     # batch and convert to tensor
     turns = [len(dialog) for dialog in src_dataset]
@@ -318,11 +328,12 @@ def get_batch_data_graph(src, tgt, graph, src_vocab, tgt_vocab,
             fidx = bidx
             continue
             
-#        shuffleidx = np.arange(0, len(sbatch))
-#        np.random.shuffle(shuffleidx)
-#        sbatch = [sbatch[idx] for idx in shuffleidx]   # [batch, turns, lengths]
-#        tbatch = [tbatch[idx] for idx in shuffleidx]   # [batch, lengths]
-#        gbatch = [gbatch[idx] for idx in shuffleidx]   # [batch, ([2, edges_num], [edges_num]),]
+        if mode == 'train':
+            shuffleidx = np.arange(0, len(sbatch))
+            np.random.shuffle(shuffleidx)
+            sbatch = [sbatch[idx] for idx in shuffleidx]   # [batch, turns, lengths]
+            tbatch = [tbatch[idx] for idx in shuffleidx]   # [batch, lengths]
+            gbatch = [gbatch[idx] for idx in shuffleidx]   # [batch, ([2, edges_num], [edges_num]),]
         
         sbatch = transformer_list(sbatch)    # [turns, batch, lengths]
         bs, ts = len(sbatch[0]), len(sbatch)

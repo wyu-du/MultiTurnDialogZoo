@@ -61,7 +61,8 @@ def translate(**kwargs):
                                              kwargs['tgt_vocab'], 
                                              kwargs['batch_size'],
                                              kwargs['maxlen'], 
-                                             kwargs["tgt_maxlen"])
+                                             kwargs["tgt_maxlen"],
+                                             mode='test')
         else:
             if kwargs['model'] in ['VHRED','KgCVAE']:
                 ld = False
@@ -70,13 +71,13 @@ def translate(**kwargs):
             test_iter = get_batch_data(kwargs['src_test'], kwargs['tgt_test'],
                                        kwargs['src_vocab'], kwargs['tgt_vocab'],
                                        kwargs['batch_size'], kwargs['maxlen'],
-                                       kwargs["tgt_maxlen"], ld=ld)
+                                       kwargs["tgt_maxlen"], ld=ld, mode='test')
     else:
         test_iter = get_batch_data_flatten(kwargs['src_test'], kwargs['tgt_test'],
                                            kwargs['src_vocab'], 
                                            kwargs['tgt_vocab'],
                                            kwargs['batch_size'], kwargs['maxlen'], 
-                                           kwargs['tgt_maxlen'])
+                                           kwargs['tgt_maxlen'], mode='test')
 
     # pretrained mode
     pretrained = None
