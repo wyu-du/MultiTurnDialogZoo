@@ -318,11 +318,11 @@ def get_batch_data_graph(src, tgt, graph, src_vocab, tgt_vocab,
             fidx = bidx
             continue
             
-        shuffleidx = np.arange(0, len(sbatch))
-        np.random.shuffle(shuffleidx)
-        sbatch = [sbatch[idx] for idx in shuffleidx]   # [batch, turns, lengths]
-        tbatch = [tbatch[idx] for idx in shuffleidx]   # [batch, lengths]
-        gbatch = [gbatch[idx] for idx in shuffleidx]   # [batch, ([2, edges_num], [edges_num]),]
+#        shuffleidx = np.arange(0, len(sbatch))
+#        np.random.shuffle(shuffleidx)
+#        sbatch = [sbatch[idx] for idx in shuffleidx]   # [batch, turns, lengths]
+#        tbatch = [tbatch[idx] for idx in shuffleidx]   # [batch, lengths]
+#        gbatch = [gbatch[idx] for idx in shuffleidx]   # [batch, ([2, edges_num], [edges_num]),]
         
         sbatch = transformer_list(sbatch)    # [turns, batch, lengths]
         bs, ts = len(sbatch[0]), len(sbatch)
