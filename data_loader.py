@@ -107,10 +107,10 @@ def get_batch_data(src, tgt, src_vocab, tgt_vocab, batch_size, maxlen, tgt_maxle
             fidx = bidx
             continue
         
-        shuffleidx = np.arange(0, len(sbatch))
-        np.random.shuffle(shuffleidx)
-        sbatch = [sbatch[idx] for idx in shuffleidx]
-        tbatch = [tbatch[idx] for idx in shuffleidx]
+#        shuffleidx = np.arange(0, len(sbatch))
+#        np.random.shuffle(shuffleidx)
+#        sbatch = [sbatch[idx] for idx in shuffleidx]
+#        tbatch = [tbatch[idx] for idx in shuffleidx]
 
         # convert to [turns, batch, lengths], [batch, lengths]
         sbatch = transformer_list(sbatch)
@@ -248,10 +248,10 @@ def get_batch_data_flatten_tf(src, tgt, batch_size, maxlen):
         bidx = fidx + batch_size
         sbatch, tbatch = src_dataset[fidx:bidx], tgt_dataset[fidx:bidx]
         # shuffle
-        shuffleidx = np.arange(0, len(sbatch))
-        np.random.shuffle(shuffleidx)
-        sbatch = [sbatch[idx] for idx in shuffleidx]
-        tbatch = [tbatch[idx] for idx in shuffleidx]
+#        shuffleidx = np.arange(0, len(sbatch))
+#        np.random.shuffle(shuffleidx)
+#        sbatch = [sbatch[idx] for idx in shuffleidx]
+#        tbatch = [tbatch[idx] for idx in shuffleidx]
         
         bs = len(sbatch)
 
